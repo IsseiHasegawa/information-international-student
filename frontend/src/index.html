@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>International Student Information</title>
+</head>
+
+<body>
+  <h1>International Student Information</h1>
+  <p>Enter a USCIS page and read some basic information from it.</p>
+
+  <form id="scrape-form">
+    <input id="url" type="text" value="https://www.uscis.gov/" placeholder="https://www.uscis.gov/...">
+    <button type="submit">Get Information</button>
+  </form>
+
+  <p id="message"></p>
+
+  <div id="results" hidden>
+    <h2 id="page-title"></h2>
+
+    <h3>Headings</h3>
+    <ul id="headings"></ul>
+
+    <h3>Information</h3>
+    <div id="paragraphs"></div>
+
+    <h3>Tables</h3>
+    <div id="tables"></div>
+
+    <h3>Lists</h3>
+    <div id="lists"></div>
+
+    <h3>Useful Links</h3>
+    <ul id="links"></ul>
+
+    <p>
+      Source:
+      <a id="source" target="_blank" rel="noopener noreferrer"></a>
+    </p>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+
+</html>
