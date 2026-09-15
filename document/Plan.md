@@ -1,9 +1,11 @@
-Plan by 15, Sep
-## Issei
-- [] Make fundamental front-end
-- [] Look into flask and web scrapping
+Plan by 22, Sep
 
+## Issei
+
+- [] CI/CL
+- [] Document Rules
 
 ## Samir
+
 - [Look into flask and web scrapping]
 - [Build basic website]
