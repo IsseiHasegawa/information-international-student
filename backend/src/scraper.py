@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 def clean_text(tag):
     text = tag.get_text(" ", strip=True)
-    text = unescape(text)
+    text = unescape(unescape(text))
     text = " ".join(text.split())
 
     return text
@@ -22,30 +22,26 @@ def scrape_page(url):
     if domain != "uscis.gov" and not domain.endswith(".uscis.gov"):
         raise ValueError("Please use a USCIS.gov URL.")
 
-    # Make the request to the URL
+    # Get the USCIS page
     response = requests.get(
         url,
         headers={"User-Agent": "StudentInfoProject/1.0"},
         timeout=10,
     )
-
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
 
     title = ""
-
     if soup.title:
         title = clean_text(soup.title)
 
-    # Try to find USCIS main article area
+    # Work with the main part of the page
     content = soup.find("main")
-
     if content is None:
         content = soup
 
-
-    # Remove things we do not want
+    # Remove page parts we do not need
     for item in content.find_all([
         "script",
         "style",
@@ -54,92 +50,112 @@ def scrape_page(url):
         "footer",
         "aside",
         "form",
-        "button"
+        "button",
+        "noscript",
+        "svg",
     ]):
         item.decompose()
 
-    # HEADINGS
-    headings = []
+    # Keep content in the same order as the USCIS page
+    page_content = []
 
-    for heading in content.find_all(["h1", "h2", "h3"]):
-
-        text = clean_text(heading)
-
-        if text:
-            headings.append(text)
-
-
-    # PARAGRAPHS
-    paragraphs = []
-
-    for paragraph in content.find_all("p"):
-
-        text = clean_text(paragraph)
-
-        if len(text) > 40:
-            paragraphs.append(text)
-
-    # TABLES
-    tables = []
-
-    for table in content.find_all("table"):
-        rows = []
-
-        for row in table.find_all("tr"):
-            cells = []
-
-            for cell in row.find_all(["th", "td"]):
-                text = clean_text(cell)
-                cells.append(text)
-
-            if cells:
-                rows.append(cells)
-
-        if rows:
-            tables.append(rows)
-
-    lists = []
-
-    for list_tag in content.find_all(["ul", "ol"]):
-
-        items = []
-
-        for item in list_tag.find_all("li"):
-            text = clean_text(item)
-
-            if text:
-                items.append(text)
-
-        if items:
-            lists.append(items)
-
-    # LINKS
-    links = []
-
-    for link in content.find_all("a", href=True):
-
-        text = clean_text(link)
-
-        if not text:
+    for element in content.find_all([
+        "h1",
+        "h2",
+        "h3",
+        "p",
+        "ul",
+        "ol",
+        "table",
+    ]):
+        # Text inside a list or table will be handled by that list/table
+        if element.name == "p" and element.find_parent(["ul", "ol", "table"]):
             continue
 
-        full_url = urljoin(
-            response.url,
-            link["href"]
-        )
+        # Do not add nested lists twice
+        if element.name in ["ul", "ol"] and element.find_parent(["ul", "ol", "table"]):
+            continue
 
+        if element.name in ["h1", "h2", "h3"]:
+            text = clean_text(element)
+
+            if text:
+                page_content.append({
+                    "type": "heading",
+                    "level": element.name,
+                    "text": text,
+                })
+
+        elif element.name == "p":
+            text = clean_text(element)
+
+            if text:
+                page_content.append({
+                    "type": "paragraph",
+                    "text": text,
+                })
+
+        elif element.name in ["ul", "ol"]:
+            items = []
+
+            for item in element.find_all("li", recursive=False):
+                text = clean_text(item)
+
+                if text:
+                    items.append(text)
+
+            if items:
+                page_content.append({
+                    "type": "list",
+                    "list_type": element.name,
+                    "items": items,
+                })
+
+        elif element.name == "table":
+            rows = []
+
+            for row in element.find_all("tr"):
+                cells = []
+
+                for cell in row.find_all(["th", "td"], recursive=False):
+                    text = clean_text(cell)
+                    cells.append(text)
+
+                if cells:
+                    rows.append(cells)
+
+            if rows:
+                page_content.append({
+                    "type": "table",
+                    "rows": rows,
+                })
+
+    # Keep useful links separate from the article content
+    links = []
+    seen_links = set()
+
+    for link in content.find_all("a", href=True):
+        text = clean_text(link)
+        href = link["href"].strip()
+
+        if not text or not href or href.startswith("#"):
+            continue
+
+        full_url = urljoin(response.url, href)
+        link_key = (text, full_url)
+
+        if link_key in seen_links:
+            continue
+
+        seen_links.add(link_key)
         links.append({
             "text": text,
-            "url": full_url
+            "url": full_url,
         })
 
-    # SEND EVERYTHING BACK
     return {
         "title": title,
-        "headings": headings,
-        "paragraphs": paragraphs,
-        "lists": lists,
-        "tables": tables,
+        "content": page_content,
         "links": links,
         "source": response.url,
     }

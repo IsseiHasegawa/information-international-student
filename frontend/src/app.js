@@ -32,59 +32,63 @@ form.addEventListener("submit", async function (event) {
 function showResults(data) {
   document.querySelector("#page-title").textContent = data.title;
 
-  //GET Headings 
-  const headings = document.querySelector("#headings");
-  headings.innerHTML = "";
+  // Show the page content in its original order
+  const content = document.querySelector("#content");
+  content.innerHTML = "";
 
-  data.headings.forEach(function (text) {
-    const item = document.createElement("li");
-    item.textContent = text;
-    headings.appendChild(item);
-  });
+  data.content.forEach(function (item) {
 
-  //GET Paragraphs
-  const paragraphs = document.querySelector("#paragraphs");
-  paragraphs.innerHTML = "";
+    if (item.type === "heading") {
+      const heading = document.createElement(item.level);
+      heading.textContent = item.text;
+      content.appendChild(heading);
+    }
 
-  data.paragraphs.forEach(function (text) {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = text;
-    paragraphs.appendChild(paragraph);
-  });
+    else if (item.type === "paragraph") {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = item.text;
+      content.appendChild(paragraph);
+    }
 
-  // GET Tables
-  const tables = document.querySelector("#tables");
-  tables.innerHTML = "";
+    else if (item.type === "list") {
+      const list = document.createElement(item.list_type);
 
-  data.tables.forEach(function (tableData) {
-
-    const table = document.createElement("table");
-
-    tableData.forEach(function (rowData, rowNumber) {
-
-      const row = document.createElement("tr");
-
-      rowData.forEach(function (cellData) {
-
-        let cell;
-
-        if (rowNumber === 0) {
-          cell = document.createElement("th");
-        } else {
-          cell = document.createElement("td");
-        }
-
-        cell.textContent = cellData;
-        row.appendChild(cell);
+      item.items.forEach(function (text) {
+        const listItem = document.createElement("li");
+        listItem.textContent = text;
+        list.appendChild(listItem);
       });
 
-      table.appendChild(row);
-    });
+      content.appendChild(list);
+    }
 
-    tables.appendChild(table);
+    else if (item.type === "table") {
+      const table = document.createElement("table");
+
+      item.rows.forEach(function (rowData, rowNumber) {
+        const row = document.createElement("tr");
+
+        rowData.forEach(function (cellData) {
+          let cell;
+
+          if (rowNumber === 0) {
+            cell = document.createElement("th");
+          } else {
+            cell = document.createElement("td");
+          }
+
+          cell.textContent = cellData;
+          row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+      });
+
+      content.appendChild(table);
+    }
   });
 
-  //GET links
+  // Show useful links
   const links = document.querySelector("#links");
   links.innerHTML = "";
 
@@ -98,25 +102,6 @@ function showResults(data) {
 
     item.appendChild(anchor);
     links.appendChild(item);
-  });
-
-  // GET Lists
-  const lists = document.querySelector("#lists");
-  lists.innerHTML = "";
-
-  data.lists.forEach(function (listData) {
-
-    const list = document.createElement("ul");
-
-    listData.forEach(function (text) {
-
-      const item = document.createElement("li");
-      item.textContent = text;
-
-      list.appendChild(item);
-    });
-
-    lists.appendChild(list);
   });
 
   const source = document.querySelector("#source");
