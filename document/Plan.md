@@ -123,6 +123,7 @@ docker-compose.yml
 ### 3. Articles & Search (MVP)
 
 - [ ] Article model (title, body, summary, source URL, last verified date, category, tags, publish status) [A] (Due: )
+- [ ] Auto Search and fetch information [Samir] (Due: 10/06)
 - [ ] Home page (latest news, links to key guides) [B] (Due: )
 - [ ] Article list, category, and tag pages [B] (Due: )
 - [ ] Article detail page (always shows source link, last verified date, and disclaimer) [B] (Due: )
