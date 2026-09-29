@@ -94,15 +94,15 @@ docker-compose.yml
 
 **Setup**
 
-- [ ] Create GitHub repo and branch rules (protect main, PRs reviewed by the other person) [x] (Due: )
+- [x] Create GitHub repo and branch rules (protect main, PRs reviewed by the other person) [] (Due: )
 - [ ] Set up Docker Compose (Flask + PostgreSQL) [A] (Due: )
-- [ ] Create Flask skeleton (`create_app`, Blueprints, separate config for dev / test / prod) [x] (Due: )
+- [x] Create Flask skeleton (`create_app`, Blueprints, separate config for dev / test / prod) [] (Due: )
 - [ ] Set up Flask-Migrate [A] (Due: )
 - [ ] Add `.env.example` and keep secrets out of Git [A] (Due: )
 - [ ] Seed script for sample data in local dev [A] (Due: )
 - [ ] README with local setup steps [A+B] (Due: )
-- [ ] PR template and pre-commit hooks (ruff, Prettier) [x] (Due: )
-- [ ] Build base layout (header, footer, shared CSS) [B] (Due:Issei 10/06)
+- [x] PR template and pre-commit hooks (ruff, Prettier) [x] (Due: )
+- [x] Build base layout (header, footer, shared CSS) [Issei] (Due:10/06)
 
 **CI (GitHub Actions)**
 
