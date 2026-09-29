@@ -3,3 +3,8 @@ line-length = 88
 
 [tool.ruff.lint]
 extend-select = ["E501"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.9",
+]
