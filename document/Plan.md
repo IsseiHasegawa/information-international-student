@@ -85,7 +85,7 @@ docker-compose.yml
 - [ ] Define the scope of visas and topics (F-1, J-1, M-1, CPT/OPT/STEM OPT, travel & re-entry, post-graduation options, etc.) [A+B] (Due: )
 - [ ] Define categories and tags (topic / visa type / nationality) [A+B] (Due: )
 - [ ] List all pages and create wireframes (home, article list, article detail, search results, subscribe, admin) [B] (Due: )
-- [ ] Design the database (articles, categories, tags, sources, fetched_items, collector_runs, subscribers, users, questions, answers, reports) [A] (Due: )
+- [ ] Design the database (articles, categories, tags, sources, fetched_items, collector_runs, subscribers, users, questions, answers, reports) [Samir] (Due: 10/6)
 - [ ] Finalize the source list and test how to fetch each one (see "Sources" below) [A] (Due: )
 - [ ] Choose a hosting provider (Render / Railway / Fly.io, etc.) and check the cost of staging and Redis [A] (Due: )
 - [ ] Choose an email delivery service [A] (Due: )
