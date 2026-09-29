@@ -114,7 +114,7 @@ docker-compose.yml
 
 **CD**
 
-- [ ] Set up a staging environment and deploy to it early [A] (Due: )
+- [ ] Set up a staging environment and deploy to it early [Issei] (Due:10/6)
 - [ ] Auto-deploy: merge to main → CI passes → deploy [A] (Due: )
 - [ ] Run DB migrations automatically on deploy [A] (Due: )
 - [ ] Health check endpoint (`/healthz`) [A] (Due: )
