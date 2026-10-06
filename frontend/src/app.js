@@ -23,7 +23,14 @@ form.addEventListener("submit", async function (event) {
     }
 
     showResults(data);
-    message.textContent = "Done.";
+    if(data.last_check_status === "error"){
+      message.textContent = "Loaded Saved page.The latest daily check failed: " + data.last_error;
+    }
+    else{
+      message.textContent = data.cached
+        ? "Loaded saved page. Last checked: " + data.last_checked_at + "."
+        : "Page fetched and saved. Last checked: " + data.last_checked_at + ".";
+    }
   } catch (error) {
     message.textContent = error.message;
   }
