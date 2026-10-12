@@ -2,12 +2,27 @@ const form = document.querySelector("#scrape-form");
 const urlInput = document.querySelector("#url");
 const message = document.querySelector("#message");
 const results = document.querySelector("#results");
+const summarizeButton = document.querySelector("#summarize-button");
+const summaryStatus = document.querySelector("#summary-status");
+const summaryText = document.querySelector("#summary-text");
+let currentPageUrl = null;
+
+urlInput.addEventListener("input", function () {
+  currentPageUrl = null;
+  summarizeButton.disabled = true;
+  summaryStatus.textContent = "";
+  summaryText.textContent = "";
+});
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   message.textContent = "Getting information...";
   results.hidden = true;
+  currentPageUrl = null;
+  summarizeButton.disabled = true;
+  summaryStatus.textContent = "";
+  summaryText.textContent = "";
 
   try {
     const response = await fetch("/api/scrape", {
@@ -16,13 +31,15 @@ form.addEventListener("submit", async function (event) {
       body: JSON.stringify({ url: urlInput.value }),
     });
 
-    const data = await response.json();
+    const data = await response.json().catch(() => ({ error: "The server returned an unexpected response." }));
 
-    if (!response.ok) {
-      throw new Error(data.error);
+    if (!response.ok || !data.content) {
+      throw new Error(data.error || "The server did not return page content.");
     }
 
     showResults(data);
+    currentPageUrl = urlInput.value.trim();
+    summarizeButton.disabled = false;
     if(data.last_check_status === "error"){
       message.textContent = "Loaded Saved page.The latest daily check failed: " + data.last_error;
     }
@@ -33,6 +50,34 @@ form.addEventListener("submit", async function (event) {
     }
   } catch (error) {
     message.textContent = error.message;
+  }
+});
+
+summarizeButton.addEventListener("click", async function () {
+  if (!currentPageUrl) return;
+
+  summarizeButton.disabled = true;
+  summaryStatus.textContent = "Creating AI summary...";
+  summaryText.textContent = "";
+
+  try {
+    const response = await fetch("/api/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: currentPageUrl }),
+    });
+    const data = await response.json().catch(() => ({ error: "The server returned an unexpected response." }));
+
+    if (!response.ok || !data.summary) {
+      throw new Error(data.error || "The AI service returned no summary.");
+    }
+
+    summaryText.textContent = data.summary;
+    summaryStatus.textContent = "Summary ready. Check the USCIS source for details.";
+  } catch (error) {
+    summaryStatus.textContent = error.message;
+  } finally {
+    summarizeButton.disabled = false;
   }
 });
 

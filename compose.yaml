@@ -22,11 +22,28 @@ services:
       PGDATABASE: StudentInformation
       PGUSER: studentapp
       PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "127.0.0.1:5000:5000"
+    restart: unless-stopped
+
+  checker:
+    build: .
+    command: ["python", "-u", "backend/src/scheduler.py"]
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: StudentInformation
+      PGUSER: studentapp
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      CHECK_TIMEZONE: ${CHECK_TIMEZONE:-America/Chicago}
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

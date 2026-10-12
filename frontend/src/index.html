@@ -14,9 +14,12 @@
   <form id="scrape-form">
     <input id="url" type="text" value="https://www.uscis.gov/" placeholder="https://www.uscis.gov/...">
     <button type="submit">Get Information</button>
+    <button id="summarize-button" type="button" disabled>Create AI summary</button>
   </form>
 
   <p id="message"></p>
+  <p id="summary-status" role="status"></p>
+  <div id="summary-text" style="white-space: pre-wrap;"></div>
 
   <div id="results" hidden>
     <h2 id="page-title"></h2>

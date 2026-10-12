@@ -81,7 +81,6 @@ def scrape_page(url):
     ]):
         item.decompose()
 
-    # Keep content in the same order as the USCIS page
     page_content = []
 
     for element in content.find_all([
