@@ -1,5 +1,5 @@
 from html import unescape
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,21 +13,46 @@ def clean_text(tag):
     return text
 
 
-def scrape_page(url):
+def normalize_url(url):
+    url = url.strip()
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
-    domain = urlparse(url).netloc.lower()
+    parsed = urlsplit(url)
+    domain = (parsed.hostname or "").lower()
 
-    if domain != "uscis.gov" and not domain.endswith(".uscis.gov"):
-        raise ValueError("Please use a USCIS.gov URL.")
+    if (
+        parsed.scheme != "https"
+        or (domain != "uscis.gov" and not domain.endswith(".uscis.gov"))
+        or parsed.username
+        or parsed.password
+        or parsed.port not in (None, 443)
+    ):
+        raise ValueError("Please use an HTTPS USCIS.gov URL.")
 
-    # Get the USCIS page
-    response = requests.get(
-        url,
-        headers={"User-Agent": "StudentInfoProject/1.0"},
-        timeout=10,
-    )
+    return urlunsplit(("https", parsed.netloc.lower(), parsed.path or "/", parsed.query, ""))
+
+
+def scrape_page(url):
+    url = normalize_url(url)
+
+    #Get the Page
+    for _ in range(5):
+        response = requests.get(url,
+                                headers={"User-Agent": "StudentInfoProject/1.0"},
+                                timeout = 10,
+                                allow_redirects=False,
+                                )
+        if response.is_redirect:
+            location = response.headers.get("Location")
+            if not location:
+                raise ValueError("The source redirected without a destination.")
+            url = normalize_url(urljoin(url, location))
+            continue
+        break
+    else:
+        raise ValueError("The source redirected too many times.")
+    
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
@@ -130,6 +155,10 @@ def scrape_page(url):
                     "rows": rows,
                 })
 
+    if not page_content:
+        raise ValueError("No readable page content was found; the saved copy was kept.")
+
+    
     # Keep useful links separate from the article content
     links = []
     seen_links = set()
