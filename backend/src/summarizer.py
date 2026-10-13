@@ -1,10 +1,12 @@
 import os
+import time
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
-MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
+class SummaryUnavailable(Exception):
+    """A summary could not be created, but the saved page is still usable."""
 
 
 def content_to_text(content):
@@ -32,16 +34,12 @@ def summarize_content(content):
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
-        raise ValueError("GEMINI_API_KEY is missing from .env")
-
-    # Scraping still works even when Gemini is not configured
-    if not api_key:
-        return None
+        raise SummaryUnavailable("AI summary is not configured. Add GEMINI_API_KEY to .env and restart the web service.")
 
     page_text = content_to_text(content)
 
     if not page_text:
-        return None
+        raise SummaryUnavailable("This saved page has no text to summarize.")
 
     prompt = f"""
 Summarize the USCIS information below for quick reading.
@@ -63,35 +61,44 @@ USCIS INFORMATION:
         f"{MODEL}:generateContent"
     )
 
-    response = requests.post(
-        url,
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": api_key,
-        },
-        json={
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt}
-                    ]
-                }
-            ],
-            "generationConfig": {
-                "temperature": 0.2,
-                "maxOutputTokens": 700,
+    for attempt in range(2):
+        response = requests.post(
+            url,
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": api_key,
             },
-        },
-        timeout=30,
-    )
+            json={
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": prompt}
+                        ]
+                    }
+                ],
+            },
+            timeout=30,
+        )
+        if response.status_code != 503 or attempt == 1:
+            break
+        time.sleep(1)
 
-    response.raise_for_status()
+    if not response.ok:
+        try:
+            detail = response.json().get("error", {}).get("message", "")
+        except (ValueError, AttributeError):
+            detail = ""
+        detail = detail.replace(api_key, "[redacted]").strip()[:300]
+        raise SummaryUnavailable(
+            f"AI service returned HTTP {response.status_code}: {detail}"
+            if detail else f"AI service returned HTTP {response.status_code}. Check the API key, model, and quota."
+        )
     data = response.json()
 
     candidates = data.get("candidates", [])
 
     if not candidates:
-        return None
+        raise SummaryUnavailable("The AI service returned no summary. Try again later.")
 
     parts = candidates[0].get("content", {}).get("parts", [])
     summary_parts = []
@@ -103,6 +110,6 @@ USCIS INFORMATION:
             summary_parts.append(text)
 
     if not summary_parts:
-        return None
+        raise SummaryUnavailable("The AI service returned no summary. Try again later.")
 
     return "\n".join(summary_parts)
