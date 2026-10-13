@@ -85,7 +85,7 @@ docker-compose.yml
 - [ ] Define the scope of visas and topics (F-1, J-1, M-1, CPT/OPT/STEM OPT, travel & re-entry, post-graduation options, etc.) [A+B] (Due: )
 - [ ] Define categories and tags (topic / visa type / nationality) [A+B] (Due: )
 - [ ] List all pages and create wireframes (home, article list, article detail, search results, subscribe, admin) [B] (Due: )
-- [ ] Design the database (articles, categories, tags, sources, fetched_items, collector_runs, subscribers, users, questions, answers, reports) [Samir] (Due: 10/6)
+- [x] Design the database (articles, categories, tags, sources, fetched_items, collector_runs, subscribers, users, questions, answers, reports) [Samir] (Due: 10/6)
 - [ ] Finalize the source list and test how to fetch each one (see "Sources" below) [A] (Due: )
 - [ ] Choose a hosting provider (Render / Railway / Fly.io, etc.) and check the cost of staging and Redis [A] (Due: )
 - [ ] Choose an email delivery service [A] (Due: )
@@ -147,9 +147,9 @@ docker-compose.yml
 - [ ] U.S. Department of State RSS collector [A] (Due: )
 - [ ] Decide how to track Study in the States (scraping or manual check procedure) [A] (Due: )
 - [ ] Keyword-based relevance filter [A] (Due: )
-- [ ] Duplicate detection (same URL / same document number) [A] (Due: )
+- [x] Duplicate detection (same URL / same document number) [A] (Due: )
 - [ ] Scraping etiquette (check robots.txt, contact info in User-Agent, rate limiting) [A] (Due: )
-- [ ] (Optional) LLM-generated plain English summary drafts [A] (Due: )
+- [ ] (Optional) LLM-generated plain English summary drafts [Samir] (Due: 10/20/26)
 
 **Scheduling & reliability**
 
